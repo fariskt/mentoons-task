@@ -33,6 +33,13 @@ social media app where users can connect and chat in real-time. Built with **Rea
 - npm install
 - npm run dev
 
+  #Routes
+  user routes :
+    /api/user/login - login
+    /api/user/register - register
+    /api/user/me  - getlogin user info
+
+
 ### Frontend
 
 - cd frontend
