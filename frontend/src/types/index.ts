@@ -7,6 +7,9 @@ export interface User {
   createdAt: Date;
   connections: string[];
   connectionRequests: string[];
+  preferences: {
+    blockedUsers: string[]
+  }
 }
 
 export interface LoginData {

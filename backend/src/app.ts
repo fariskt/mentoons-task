@@ -13,7 +13,7 @@ const server = http.createServer(app);
 
 
 app.use(cors({
-    origin: "https://mentoons-task.vercel.app",
+    origin: ["https://mentoons-task.vercel.app", "http://localhost:5173"],
     credentials: true
 }))
 

@@ -24,10 +24,10 @@ const Freinds = () => {
       },
     });
   };
-  const hanldeChatPage =(connectionId:string)=> {
-    const isConnected = loggedUser?.connections.includes(connectionId)
+  const hanldeChatPage =(connectedUser:User)=> {
+    const isConnected = loggedUser?.connections.includes(connectedUser._id) || connectedUser.connections.includes(loggedUser?._id || "")
     if(isConnected){
-      navigate(`/chat/${connectionId}`)
+      navigate(`/chat/${connectedUser._id}`)
     }else{
       return
     }
@@ -51,7 +51,7 @@ const Freinds = () => {
               key={user._id}
               className="flex justify-between items-center w-full max-w-xl"
             >
-                <div className={`${user.connections.includes(loggedUser?._id || "") ? "cursor-pointer" : ""} flex items-center gap-2`} onClick={()=> hanldeChatPage(user._id)} >
+                <div className={`${user.connections.includes(loggedUser?._id || "") ? "cursor-pointer" : ""} flex items-center gap-2`} onClick={()=> hanldeChatPage(user)} >
                   <img
                     src={
                       user.avatar ||
@@ -77,6 +77,7 @@ const Freinds = () => {
                   </div>
                 </div>
               <ConnectionButton
+                key={user._id}
                 isPending={isPending}
                 selectConnectionId={selectConnectionId}
                 user={user}

@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
 import { MdKeyboardBackspace } from "react-icons/md";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AxiosInstance } from "../utils/AxiosInstance";
 import { getSocket } from "../utils/socket";
 import { useAuthStore } from "../store/useAuthStore";
 import type { Message } from "../types";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import toast from "react-hot-toast";
 
 const Chat: React.FC = () => {
   const { connectionId } = useParams();
@@ -14,6 +16,9 @@ const Chat: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const socket = getSocket();
   const chatRef = useRef<HTMLDivElement | null>(null);
+  const [showBlock, setShowBlock] = useState(false);
+  const navigate = useNavigate();
+  // const queryClient = useQueryClient(/)
 
   const { data: connectedUser } = useQuery({
     queryKey: ["fetchUserById"],
@@ -82,29 +87,62 @@ const Chat: React.FC = () => {
     chatRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, connectedUser?._id, user?._id, chatRef]);
 
+  const handleBlockUser = async (userIdtoBlock: string) => {
+    try {
+      const res = await AxiosInstance.patch(`/api/user/block/${userIdtoBlock}`);
+      toast.success("User has been blocked");
+      navigate("/");
+      return res.data;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.log(error);
+      toast.error("Error blocking user");
+    }
+  };
+
+  const isBlocked = connectedUser?.preferences.blockedUsers.includes(user?._id || "");
+
   return (
     <div className="w-full ">
-      <div className="ml-5 mt-5 flex items-center gap-2  border-b border-b-gray-300 pb-5 ">
-        <Link to="/">
-          <span>
-            <MdKeyboardBackspace size={30} />
-          </span>
-        </Link>
-        <img
-          className="h-10 md:h-12 md:w-12 w-10 rounded-full"
-          src={
-            connectedUser?.avatar ||
-            "https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg"
-          }
-          alt=""
-        />
-        <h1 className="md:text-xl font-semibold">{connectedUser?.username}</h1>
+      <div className="ml-5 mt-5 flex items-center justify-between gap-2  border-b border-b-gray-300 pb-5 ">
+        <div className="flex items-center gap-2">
+          <Link to="/">
+            <span>
+              <MdKeyboardBackspace size={30} />
+            </span>
+          </Link>
+          <img
+            className="h-10 md:h-12 md:w-12 w-10 rounded-full"
+            src={
+              connectedUser?.avatar ||
+              "https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg"
+            }
+            alt=""
+          />
+          <h1 className="md:text-xl font-semibold">
+            {connectedUser?.username}
+          </h1>
+        </div>
+        <span
+          className="mr-10 cursor-pointer"
+          onClick={() => setShowBlock(!showBlock)}
+        >
+          <BsThreeDotsVertical size={20} />
+        </span>
       </div>
+      {showBlock && (
+        <div
+          onClick={() => handleBlockUser(connectedUser._id)}
+          className="absolute right-20 top-24 bg-red-400 px-4 py-3 rounded-md hover:bg-red-600 cursor-pointer"
+        >
+          <button className="cursor-pointer text-white">Block</button>
+        </div>
+      )}
       <div className="mx-5 md:mx-20 my-5 md:max-h-[450px] max-h-[380px] overflow-y-auto hide-scrollbar">
-        {messages.length > 0 ? (
+        {isBlocked ? <p className="text-gray-500 text-center">You have been blocked by {connectedUser?.username || "unknown"}</p> : messages.length > 0 ? (
           messages?.map((msg: Message, index, arr) => {
             const isSender = msg.senderId === user?._id;
-            const prevMsg :Message = arr[index - 1];
+            const prevMsg: Message = arr[index - 1];
             const isSameSender = prevMsg && prevMsg.senderId === msg.senderId;
 
             return (
@@ -114,9 +152,6 @@ const Chat: React.FC = () => {
                   isSender ? "justify-end mb-2" : "mb-2"
                 }`}
               >
-              
-               
-
                 <div className={`${isSender ? "items-end" : ""} flex flex-col`}>
                   <div
                     className={`flex flex-row items-end gap-2 ${
