@@ -35,9 +35,9 @@ social media app where users can connect and chat in real-time. Built with **Rea
 
   #Routes
   user routes :
-    /api/user/login - login
-    /api/user/register - register
-    /api/user/me  - getlogin user info
+   - /api/user/login - login
+   - /api/user/register - register
+   - /api/user/me  - getlogin user info
 
 
 ### Frontend
