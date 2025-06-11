@@ -2,12 +2,12 @@ import React from "react";
 import type { User } from "../../types";
 
 interface ConnectionButtonProps {
-    isPending:boolean,
+  isPending:boolean,
   user: User; 
   loggedUser: User | null;
   sendConnectionRequest: (userid : string)=> void
   selectConnectionId:string;
-  hanldeChatPage:(userid:string)=> void
+  hanldeChatPage:(user:User)=> void
 }
 
 const ConnectionButton: React.FC<ConnectionButtonProps> = ({ user, loggedUser, sendConnectionRequest, isPending, selectConnectionId, hanldeChatPage}) => {
@@ -20,7 +20,7 @@ const ConnectionButton: React.FC<ConnectionButtonProps> = ({ user, loggedUser, s
     return null;
   }
   const hasSentRequest = user?.connectionRequests.includes(loggedUser._id);
-  const isConnected = user.connections.includes(loggedUser._id);
+  const isConnected = loggedUser.connections.includes(user._id) || user.connections.includes(loggedUser._id);
   
 
   return (
@@ -34,7 +34,7 @@ const ConnectionButton: React.FC<ConnectionButtonProps> = ({ user, loggedUser, s
         </button>
       ) : isConnected ? (
         <button
-          onClick={()=> hanldeChatPage(user._id)}
+          onClick={()=> hanldeChatPage(user)}
           className="border border-[#EC9600] rounded-md py-2 px-4 md:w-32 w-28 md:text-base text-sm text-[#EC9600] font-medium opacity-50 cursor-pointer"
         >
           Connected

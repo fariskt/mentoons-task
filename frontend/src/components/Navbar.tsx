@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AxiosInstance } from "../utils/AxiosInstance";
@@ -9,7 +9,6 @@ import { FaUserCircle } from "react-icons/fa";
 import {
   useAcceptConnection,
   useConnectionRequests,
-  useGetAllusers,
 } from "../services/userService";
 import type { User } from "../types";
 
@@ -17,12 +16,13 @@ const Navbar: React.FC = () => {
   const { setUser, user } = useAuthStore();
   const [showNotification, setShowNotification] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const { refetch: refetchAllUsers } = useGetAllusers();
+  const queryClient = useQueryClient()
   const { data: connectRequesters, refetch } = useConnectionRequests();
   const { mutate: acceptMutation, isPending } = useAcceptConnection();
   const [selectedAcceptReq, setSelectedAcceptReq] = useState("");
   const navigate= useNavigate()
-  const { data, isLoading } = useQuery({
+
+  const { data, isLoading , refetch:refetchLoggedUser} = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
       const res = await AxiosInstance.get("/api/user/me");
@@ -40,8 +40,9 @@ const Navbar: React.FC = () => {
     setSelectedAcceptReq(connectedUserID);
     acceptMutation(connectedUserID, {
       onSuccess: () => {
-        refetchAllUsers();
+        refetchLoggedUser()
         refetch();
+        queryClient.invalidateQueries({queryKey: ["allusers"]})
         setShowNotification(false);
       },
     });
